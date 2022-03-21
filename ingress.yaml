@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+     # nginx.ingress.kubernetes.io/rewrite-target: /
+     # nginx.ingress.kubernetes.io/use-regex: "true"
+  name: vote
+  namespace: default
+spec:
+  ingressClassName: nginx 
+  # defaultBackend:
+  #   service:
+  #     name: {{ .Values.services.voter.serviceName }}
+  #     port:
+  #       number: {{ .Values.services.voter.servicePort }}
+  rules:
+  - host: current-cluster.roost.io
+    http:
+      paths:
+      - path: /voter
+        pathType: Prefix
+        backend:
+          service:
+            name: voter
+            port:
+              number: 80
+      - path: /ballot
+        pathType: Prefix
+        backend:
+          service:
+            name: ballot
+            port:
+              number: 80
+      - path: /ecserver
+        pathType: Prefix
+        backend:
+          service:
+            name: ecserver
+            port:
+              number: 80
+      - path: /ec
+        pathType: Prefix
+        backend:
+          service:
+            name: election-commission
+            port:
+              number: 80
+                

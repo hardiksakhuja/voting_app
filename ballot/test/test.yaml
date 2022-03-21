@@ -1,0 +1,51 @@
+config:
+  target: "http://roost-controlplane:30080"
+  http:
+    # Responses have to be sent within 10 seconds, or an `ETIMEDOUT` error gets raised.
+    timeout: 10
+  environments:
+    production:
+      target: "http://roost-controlplane:30080"
+      phases:
+        - duration: 15
+          arrivalRate: 5
+    unit:
+      target: "http://roost-controlplane:30080"
+      phases:
+        - duration: 5
+          arrivalRate: 2
+  phases:
+    - duration: 5
+      arrivalRate: 5
+      name: Warm up
+  payload:
+    path: "options.csv"
+    fields:
+      - "option"
+  plugins:
+    expect: 
+      outputFormat: silent
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+    
+scenarios:
+  - name: "Get Votes"
+    flow:
+      - get:
+          url: "/"
+          name: getRequest
+          expect:
+            - statusCode: 200
+            - contentType: json
+
+  - name: "Post Votes"
+    flow:
+      - post:
+          url: "/"
+          name: postRequest
+          json: 
+            vote: ${random.int}
+            candidate_id: "{{option}}"
+          expect:
+            - statusCode: 200
+
